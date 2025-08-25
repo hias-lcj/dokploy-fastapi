@@ -1,0 +1,133 @@
+<!-- static/index.html -->
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>用户管理系统</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <div class="container mx-auto p-6 max-w-3xl">
+    <h1 class="text-3xl font-bold text-center mb-6 text-blue-600">用户管理系统</h1>
+
+    <!-- 添加用户表单 -->
+    <div class="bg-white p-6 rounded-lg shadow mb-6">
+      <h2 class="text-xl font-semibold mb-4">添加新用户</h2>
+      <form id="createForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">姓名</label>
+          <input type="text" name="name" required
+                 class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">邮箱</label>
+          <input type="email" name="email" required
+                 class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+        </div>
+        <button type="submit"
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+          添加用户
+        </button>
+      </form>
+    </div>
+
+    <!-- 用户列表 -->
+    <div class="bg-white p-6 rounded-lg shadow">
+      <h2 class="text-xl font-semibold mb-4">用户列表</h2>
+      <div id="userList" class="space-y-3">
+        <p class="text-gray-500">正在加载...</p>
+      </div>
+    </div>
+  </div>
+  <!-- 新增：RDS 用户列表 -->
+  <div class="bg-white p-6 rounded-lg shadow mt-6">
+    <h2 class="text-xl font-semibold mb-4">RDS 只读数据库用户</h2>
+    <div id="rdsUserList" class="space-y-3 text-sm text-gray-600">
+      <p>加载中...</p>
+    </div>
+  </div>
+  
+
+  <script>
+    // ✅ 获取所有用户
+    async function loadUsers() {
+        try {
+        const res = await fetch('/users');  // ✅ 这个路径现在能正确访问 API
+        const users = await res.json();
+        const list = document.getElementById('userList');
+        if (users.length === 0) {
+            list.innerHTML = '<p class="text-gray-500">暂无用户</p>';
+            return;
+        }
+        list.innerHTML = users.map(u => `
+            <div class="border-b pb-2">
+            <strong>${u.name}</strong> &lt;${u.email}&gt;
+            <span class="text-sm text-gray-500 ml-2">(${u.created_at})</span>
+            </div>
+        `).join('');
+        } catch (err) {
+        console.error("加载用户失败:", err);
+        document.getElementById('userList').innerHTML = '<p class="text-red-500">加载失败</p>';
+        }
+    }
+
+    // ✅ 添加用户
+    document.getElementById('createForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
+
+        try {
+        const res = await fetch('/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+            e.target.reset();
+            await loadUsers(); // 刷新列表
+        } else {
+            const error = await res.json();
+            alert("添加失败: " + error.detail);
+        }
+        } catch (err) {
+        console.error("请求失败:", err);
+        alert("网络错误");
+        }
+    });
+
+    // ✅ 加载 RDS 用户
+    async function loadRDSUsers() {
+        try {
+        const res = await fetch('/rds/users');
+        const data = await res.json();
+        const list = document.getElementById('rdsUserList');
+        
+        if (data.data.length === 0) {
+            list.innerHTML = '<p class="text-gray-500">RDS 中暂无用户</p>';
+            return;
+        }
+
+        list.innerHTML = data.data.map(u => `
+            <div class="border-b pb-2">
+            🔹 <strong>${u.id || '未知'}</strong> 
+            &lt;${u.content || '无邮箱'}&gt;
+            <span class="text-xs text-gray-400">(${u.message_time})</span>
+            </div>
+        `).join('');
+        } catch (err) {
+        console.error("加载 RDS 用户失败:", err);
+        document.getElementById('rdsUserList').innerHTML = 
+            '<p class="text-red-500">连接失败（检查网络或权限）</p>';
+        }
+    }
+    
+    // 页面加载时获取本地和 RDS 用户
+    loadUsers();
+    loadRDSUsers(); // ✅ 加载 RDS 数据
+  </script>
+</body>
+</html>
