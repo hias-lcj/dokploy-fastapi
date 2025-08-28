@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.db.mysql import get_secondary_db
+from models_new import create_products_table, create_orders_table
 
 router = APIRouter(prefix="/newdb", tags=["newdb"])
 
@@ -37,6 +38,17 @@ def get_products():
             if row["created_at"]:
                 row["created_at"] = row["created_at"].strftime("%Y-%m-%d %H:%M:%S")
         return rows
+
+
+@router.post("/init")
+def init_newdb_tables():
+    """手动初始化新库所需的表（products、orders）。"""
+    try:
+        create_products_table()
+        create_orders_table()
+        return {"ok": True, "message": "新库表已初始化"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/orders")

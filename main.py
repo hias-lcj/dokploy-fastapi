@@ -32,26 +32,46 @@ app.include_router(newdb_router)
 app.include_router(llm_router)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
 @app.get("/")
 def read_root():
+    """
+    根路由处理函数
+    返回服务的基本信息和可用端点列表
+    
+    Returns:
+        dict: 包含服务信息和各种端点URL的字典
+    """
     return {
-        "message": "多数据库 + LLM FastAPI 服务",
-        "docs": "/docs",
-        "local_users": "/users",
-        "rds_users": "/rds/users",
-        "newdb_products": "/newdb/products",
-        "newdb_orders": "/newdb/orders",
-        "llm_chat": "/llm/chat",
-        "frontend": "/static/index.html",
+        "message": "多数据库 + LLM FastAPI 服务",  # 服务描述信息
+        "docs": "/docs",  # Swagger API文档地址
+        "local_users": "/users",  # 本地用户数据库端点
+        "rds_users": "/rds/users",  # RDS用户数据库端点
+        "newdb_products": "/newdb/products",  #新产品数据库端点
+        "newdb_orders": "/newdb/orders",  # 新订单数据库端点
+        "llm_chat": "/llm/chat",  # LLM聊天服务端点
+        "frontend": "/static/index.html",  # 前端页面地址
     }
 
 if __name__ == "__main__":
+    """
+    程序入口点
+    当直接运行此脚本时，启动FastAPI服务器
+    
+    参数说明:
+        host: "0.0.0.0" 表示服务器监听所有可用的网络接口
+        port: 8000 指定服务器运行的端口号
+        reload: True 启用自动重载功能，代码修改后服务器会自动重启
+    """
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+
+# 以下是使用命令行启动FastAPI服务的命令示例：
 # python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
-#     地址	用途
-# http://localhost:8000	查看 API 信息
-# http://localhost:8000/docs	Swagger 文档
-# http://localhost:8000/static/index.html	前端页面（推荐）
-# http://localhost:8000/users	获取用户列表（API）
+
+# 服务启动后可用的地址及其用途：
+# http://localhost:8000          - 查看API基本信息
+# http://localhost:8000/docs     - Swagger API文档界面
+# http://localhost:8000/static/index.html  - 前端页面（推荐使用）
+# http://localhost:8000/users    - 获取用户列表的API端点
+
 # ✅ 推荐访问：http://localhost:8000/static/index.html
+# 这个前端页面提供了完整的用户界面，可以方便地使用所有功能

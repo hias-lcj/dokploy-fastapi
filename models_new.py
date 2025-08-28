@@ -1,5 +1,5 @@
 # models_new.py
-from database_new import get_new_db
+from app.db.mysql import get_secondary_db
 
 def create_products_table():
     """创建产品表"""
@@ -13,7 +13,7 @@ def create_products_table():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB;
     """
-    with get_new_db() as conn:
+    with get_secondary_db() as conn:
         cursor = conn.cursor()
         cursor.execute(query)
         conn.commit()
@@ -32,7 +32,7 @@ def create_orders_table():
         FOREIGN KEY (product_id) REFERENCES products(id)
     ) ENGINE=InnoDB;
     """
-    with get_new_db() as conn:
+    with get_secondary_db() as conn:
         cursor = conn.cursor()
         cursor.execute(query)
         conn.commit()
