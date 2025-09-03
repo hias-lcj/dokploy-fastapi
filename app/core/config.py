@@ -24,5 +24,5 @@ class Settings:
     LLM_MODEL = os.getenv('LLM_MODEL', 'Qwen/Qwen3-8B')
 
 settings = Settings()
-
+# print(settings)
 
