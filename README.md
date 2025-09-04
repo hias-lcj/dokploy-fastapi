@@ -114,3 +114,6 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 - LLM 初始化失败：检查 `OPENAI_API_KEY` 和 `OPENAI_API_BASE_URL`。
 - 新库/主库连接失败：确认数据库服务和权限，并核对 `.env`。
 - RDS 接口报错：确认安全组与白名单，核对 `database_rds.py` 的连接信息。
+
+## 贡献
+欢迎提交 Pull Request 或 Issue，共同改进项目。
