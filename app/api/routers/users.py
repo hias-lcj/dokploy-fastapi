@@ -2,10 +2,10 @@ from fastapi import APIRouter, HTTPException
 from app.db.mysql import get_primary_db
 from mysql import connector as mysql
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(prefix="", tags=["users"])
 
 
-@router.post("/")
+@router.post("/users")
 def create_user(user: dict):
     with get_primary_db() as conn:
         cursor = conn.cursor()
@@ -23,16 +23,21 @@ def create_user(user: dict):
             raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/")
+@router.get("/users")
 def get_users():
-    with get_primary_db() as conn:
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute(
-            "SELECT id, name, email, created_at FROM users ORDER BY created_at DESC"
-        )
-        rows = cursor.fetchall()
-        for row in rows:
-            row["created_at"] = row["created_at"].strftime("%Y-%m-%d %H:%M:%S")
-        return rows
+    try:
+        with get_primary_db() as conn:
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute(
+                "SELECT id, name, email, created_at FROM users ORDER BY created_at DESC"
+            )
+            rows = cursor.fetchall()
+            for row in rows:
+                if row["created_at"]:
+                    row["created_at"] = row["created_at"].strftime("%Y-%m-%d %H:%M:%S")
+            return rows
+    except Exception as e:
+        print(f"获取用户列表失败: {e}")
+        raise HTTPException(status_code=500, detail=f"数据库查询失败: {str(e)}")
 
 

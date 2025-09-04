@@ -13,7 +13,8 @@ def get_users_from_rds(db: MySQLConnection = Depends(get_rds_connection)):
         users = cursor.fetchall()
         return {"data": users, "total": len(users), "source": "阿里云 RDS"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"查询失败: {str(e)}")
+        print(f"RDS查询失败: {e}")
+        raise HTTPException(status_code=500, detail=f"RDS查询失败: {str(e)}")
     finally:
         cursor.close()
 

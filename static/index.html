@@ -213,7 +213,12 @@
     async function loadUsers() {
         try {
         const res = await fetch('/users');
-        const users = await res.json();
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        const text = await res.text();
+        console.log('Raw response:', text);
+        const users = JSON.parse(text);
         const list = document.getElementById('userList');
         if (users.length === 0) {
             list.innerHTML = '<p class="text-gray-500">暂无用户</p>';
@@ -227,7 +232,7 @@
         `).join('');
         } catch (err) {
         console.error("加载用户失败:", err);
-        document.getElementById('userList').innerHTML = '<p class="text-red-500">加载失败</p>';
+        document.getElementById('userList').innerHTML = '<p class="text-red-500">加载失败: ' + err.message + '</p>';
         }
     }
 
@@ -261,7 +266,12 @@
     async function loadRDSUsers() {
         try {
         const res = await fetch('/rds/users');
-        const data = await res.json();
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        const text = await res.text();
+        console.log('RDS Raw response:', text);
+        const data = JSON.parse(text);
         const list = document.getElementById('rdsUserList');
         
         if (data.data.length === 0) {
@@ -279,7 +289,7 @@
         } catch (err) {
         console.error("加载 RDS 用户失败:", err);
         document.getElementById('rdsUserList').innerHTML = 
-            '<p class="text-red-500">连接失败（检查网络或权限）</p>';
+            '<p class="text-red-500">连接失败: ' + err.message + '</p>';
         }
     }
 

@@ -52,6 +52,30 @@ def read_root():
         "frontend": "/static/index.html",  # 前端页面地址
     }
 
+@app.get("/health")
+def health_check():
+    """健康检查端点"""
+    try:
+        # 检查主数据库连接
+        from app.db.mysql import get_primary_db
+        with get_primary_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+        
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "timestamp": "2025-01-03T17:14:09Z"
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "database": "disconnected",
+            "error": str(e),
+            "timestamp": "2025-01-03T17:14:09Z"
+        }
+
 if __name__ == "__main__":
     """
     程序入口点
